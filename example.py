@@ -1,5 +1,10 @@
 from opendtuapi import *
 
 
-mydtu = opendtuapi("192.168.68.131","admin","xxx","116183123650")
+mydtu = opendtuapi("ip","admin","password","serial")
 mystatus = mydtu.getlivestatus()
+mydcWatt = mydtu.getDCPower(1)
+mydcWatt = mydtu.getDCVoltage(1)
+myNewSetPoint = mydtu.setLimit(200)
+myacPower = mydtu.getACPower()
+pass

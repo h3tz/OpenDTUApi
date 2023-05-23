@@ -9,61 +9,93 @@ class opendtuapi:
         self.dtuPassword = password
         self.dtuSerial = serial
 
-    def __getHoymilesIndex(self):
-        status = f"http://{self.dtuUrl}/api/livedata/status"
+    def __getHoymilesIndex(self, responce):
+        for idx, mydtu in enumerate(responce["inverters"]):
+            if mydtu["serial"] == self.dtuSerial:
+                break
+        return idx
+
+    def __getACElement(self,element):
+        try:
+            status = self.getlivestatus()
+            myelement = status["AC"]["0"][element]["v"]
+            return round(myelement, 3)
+        except:
+            return 0
+
+    def __getDCElement(self,element, inputIndex):
+        try:
+            status = self.getlivestatus()
+            myelement = status["DC"][str(inputIndex - 1)][element]["v"]
+            return round(myelement, 3)
+        except:
+            return 0
 
     def getlivestatus(self):
         urlToRequest = f"http://{self.dtuUrl}/api/livedata/status"
         resp = requests.get(url=urlToRequest)
-        return resp.json()
+        decoded = resp.json()
+        indexDtu = self.__getHoymilesIndex(decoded)
+        return decoded["inverters"][indexDtu]
 
-    def getCurrentWatt(self):
+    def getACPower(self):
+        return self.__getACElement("Power")
+
+    def getACVoltage(self):
+        return self.__getACElement("Voltage")
+
+    def getACCurrent(self):
+        return self.__getACElement("Current")
+
+    def getACFreq(self):
+        return self.__getACElement("Frequency")
+
+    def getACReactivePower(self):
+        return self.__getACElement("ReactivePower")
+
+    def getACYieldDay(self):
+        return self.__getACElement("YieldDay")
+
+    def getACEfficience(self):
+        return self.__getACElement("Efficiency")
+
+    def getDCPower(self, inputIndex):
+        return self.__getDCElement("Power",inputIndex)
+
+    def getDCVoltage(self, inputIndex):
+        return self.__getDCElement("Voltage",inputIndex)
+
+    def getDCCurrent(self, inputIndex):
+        return self.__getDCElement("Current",inputIndex)
+
+    def getTemp(self):
         try:
             status = self.getlivestatus()
-            ret =status["inverters"][self.hoymilesCount ]["AC"]["0"]["Power"]["v"]
-            ret = round(ret, 2)
-            return ret
-        except:
-            return 0
-
-    def getInverterTemp(self):
-        try:
-            status = self.getlivestatus()
-            ret =status["inverters"][self.hoymilesCount ]["INV"]["0"]["Temperatur"]["v"]
-            return ret
+            return status["INV"]["0"]["Temperatur"]["v"]
         except:
             return 0
 
     def isproducing(self):
         try:
             status = self.getlivestatus()
-            return status["inverters"][self.hoymilesCount ]["producing"]
+            return status[self.hoymilesCount ]["producing"]
         except:
             return False
 
-    def setLimit(self, setpoint):
+    def setLimit(self, setAbsolutWatt):
         try:
             status = self.getlivestatus()
-
-
             try:
                 r = requests.post(
                     url=f'http://{self.dtuUrl}/api/limit/config',
-                    data=f'data={{"serial":"114184403178", "limit_type":0, "limit_value":{setpoint}}}',
+                    data=f'data={{"serial":"{self.dtuSerial}", "limit_type":0, "limit_value":{setAbsolutWatt}}}',
                     auth=HTTPBasicAuth(self.dtuUser, self.dtuPassword),
                     headers={'Content-Type': 'application/x-www-form-urlencoded'}
                 )
             except:
-                print('Fehler beim Senden der Konfiguration')
+                return True
         except:
-            return 0
-
-    def getLimit(self):
-        try:
-            status = self.getlivestatus()
-            return status["inverters"][self.hoymilesCount]["limit_absolute"]
-        except:
-            return 0
+            return False
 
     def hasRadioProblems(self):
         try:
@@ -71,10 +103,3 @@ class opendtuapi:
             return status["hints"]["radio_problem"]
         except:
             return True
-
-    def getModuleWatt(self, index):
-        try:
-            status = self.getlivestatus()
-            return status["inverters"][self.hoymilesCount ]["DC"][str(index-1)]["Power"]["v"]
-        except:
-            return 0
