@@ -54,8 +54,6 @@ mydtu = opendtuapi("ip","admin","password","serial")
 ```
 #/api/livedata/status
 ``` js
-from opendtuapi import *
-mydtu = opendtuapi("ip","admin","password","serial")
 mystatus = mydtu.getlivestatus()
 
 # hoymiles solarmodul connected at string 1
