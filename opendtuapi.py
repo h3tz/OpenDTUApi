@@ -38,6 +38,13 @@ class opendtuapi:
         indexDtu = self.__getHoymilesIndex(decoded)
         return decoded["inverters"][indexDtu]
 
+    # /api/network/status
+    def getNetzworkStatus(self):
+        urlToRequest = f"http://{self.dtuUrl}/api/network/status"
+        resp = requests.get(url=urlToRequest)
+        decoded = resp.json()
+        return decoded
+
     def getACPower(self):
         return self.__getACElement("Power")
 
