@@ -36,7 +36,7 @@ Have a bug or a feature request? Please open an issue.
 | Get+Post | yes | /api/mqtt/config |-
 | Get      | no  | /api/mqtt/status |-
 | Get+Post | yes | /api/network/config |-
-| Get      | no  | /api/network/status |-
+| Get      | no  | /api/network/status |Yes
 | Get+Post | yes | /api/ntp/config |-
 | Get      | no  | /api/ntp/status |-
 | Get+Post | yes | /api/ntp/time |-
@@ -65,6 +65,12 @@ myacPower = mydtu.getACPower()
 ``` js
 # set the hoymiles absolut limit in watt
 passed = mydtu.setLimit(200)
+```
+
+#/api/network/status
+``` js
+# get more details about the networkStatus
+mynetworkstatus = mydtu.getNetzworkStatus()
 ```
 
 
